@@ -7,6 +7,7 @@ import{
     deleteUser
 } from "../controllers/user.controller.js"
 
+import { checkAuth } from "../middlewares/auth.js";
 const router = express.Router();
 
 router.get("/", getUsers);
