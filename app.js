@@ -1,6 +1,11 @@
 import express from "express";
 import userRouter from "./routes/users.routes.js";
 import chalk from "chalk";
+import dotenv from "dotenv";
+import connectDB from "./config/db.js";
+
+dotenv.config();
+connectDB();
 
 const app = express();
 

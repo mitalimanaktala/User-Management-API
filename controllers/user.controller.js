@@ -1,21 +1,39 @@
 // import { json } from "express";
 import {users} from "../data/users.js"
-import { createUserService, updateUserService} from "../services/user.service.js";
+import { createUserService, getUsersService, getUsersServiceisActive, updateUserByEmailService, deleteServiceUser} from "../services/user.service.js";
 // import { use } from "react";
 
 
-export const getUsers = (req, res) => {
-    const {token} = req.headers;
-    // console.log("req", req);
-    console.log("token", token);
-    
+export const getUsers = async (req, res) => {
+    try {
+        const { token } = req.headers;
+        console.log("token", token);
 
-    res.status(200).json({
-        success: true,
-        count: users.length,
-        data: users
-    });
+        const users = await getUsersService();
+
+        res.status(200).json({
+            success: true,
+            count: users.length,
+            data: users
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
 };
+
+export const isActive = async(req, res)=> {
+    const users = await getUsersServiceisActive();
+    res.status(200).json({
+            success: true,
+            count: users.length,
+            data: users
+        });
+
+}
 
 export const getUserById = (req, res) => {
     try {
@@ -44,9 +62,9 @@ export const getUserById = (req, res) => {
 };
 
 
-export const createUser = (req, res) => {
+export const createUser = async (req, res) => {
     try{
-        const {name, email} = req.body;
+        const {name, email, password, role} = req.body;
 
         // VALIDATION
         // if(!name || !email){
@@ -65,7 +83,8 @@ export const createUser = (req, res) => {
 
         // users.push(newUser);
 
-        const userBody = createUserService(name, email);
+        // const userBody = createUserService(name, email);
+        const userBody = await createUserService(name, email, password, role);
 
         res.status(201).json({
             success: true,
@@ -91,7 +110,8 @@ export const updateUser = (req, res) => {
         // console.log("User email: ", email);
         
 
-        const updatedUser = updateUserService(id, req.body);
+        // const updatedUser = updateUserService(id, req.body);
+        const updatedUser = updateUserByEmailService(email, req.body);
 
         if(!updateUser){
             return res.status(404).json({
@@ -118,20 +138,22 @@ export const updateUser = (req, res) => {
     }
 };
 
-export const deleteUser = (req, res) => {
+export const deleteUser = async(req, res) => {
     try {
         const { id } = req.params;
+        const { email } = req.body;
 
-        const index = users.findIndex(u => u.id === id);
+        // const index = users.findIndex(u => u.id === id);
 
-        if (index === -1) {
-            return res.status(404).json({
-                success: false,
-                message: "User not found"
-            });
-        }
+        // if (index === -1) {
+        //     return res.status(404).json({
+        //         success: false,
+        //         message: "User not found"
+        //     });
+        // }
 
-        const deletedUser = users.splice(index, 1);
+        // const deletedUser = users.splice(index, 1);
+        const deletedUser = await deleteServiceUser(email);
 
         res.status(200).json({
             success: true,
