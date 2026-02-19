@@ -6,7 +6,9 @@ import{
     updateUser,
     deleteUser,
     getUserById,
-    isActive
+    isActive,
+    createPost,
+    getPost
 } from "../controllers/user.controller.js"
 import { checkAuth, validateUserId, validateZod } from "../middlewares/auth.js";
 import {validateCreateUserDTO} from "../dtos/user.dto.js"
@@ -24,6 +26,8 @@ router.get("/isactive", isActive);
 router.patch("/update", updateUser);
 router.delete("/email", deleteUser);
 router.delete("/:id", deleteUser);
+router.post("/post",createPost);
+router.get("/post",getPost);
 
 
 export default router;

@@ -1,6 +1,7 @@
 import { id } from "zod/locales";
 import { users } from "../data/users.js"
 import User from "../models/user.js";
+import Post from "../models/post.js";
 
 // export const deleteUserService = (id) => {
 //     const index = users.findIndex(u => u.id === id);
@@ -98,4 +99,28 @@ export const deleteServiceUser = async(email) => {
     const newUser = await User.findOneAndDelete({email});
     
     return newUser;
+}
+
+
+export const createPostService=async(title,content,user)=>{
+    const PostData=await Post.create({
+        title:title,
+        content:content,
+        user:user
+    })
+    return PostData;
+}
+
+export const getPostUsersService=async()=>{
+    const PostData=await Post.find().populate("user","name email");
+    return PostData;
+}
+
+export const updatePasswordbyId=async(userId,newPassword)=>{
+    const user=await User.findById(userId);
+
+    user.password=newPassword;
+    await user.save();
+
+    return user;
 }

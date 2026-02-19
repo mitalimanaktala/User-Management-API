@@ -1,8 +1,8 @@
 // import { json } from "express";
-import {users} from "../data/users.js"
-import { createUserService, getUsersService, getUsersServiceisActive, updateUserByEmailService, deleteServiceUser} from "../services/user.service.js";
+import { users } from "../data/users.js";
+import {createUserService, getUsersService, getUsersServiceisActive, updateUserByEmailService, deleteServiceUser, createPostService, getPostUsersService
+} from "../services/user.service.js";
 // import { use } from "react";
-
 
 export const getUsers = async (req, res) => {
     try {
@@ -25,15 +25,23 @@ export const getUsers = async (req, res) => {
     }
 };
 
-export const isActive = async(req, res)=> {
-    const users = await getUsersServiceisActive();
-    res.status(200).json({
+export const isActive = async (req, res) => {
+    try {
+        const users = await getUsersServiceisActive();
+
+        res.status(200).json({
             success: true,
             count: users.length,
             data: users
         });
 
-}
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
 
 export const getUserById = (req, res) => {
     try {
@@ -61,29 +69,34 @@ export const getUserById = (req, res) => {
     }
 };
 
-
 export const createUser = async (req, res) => {
-    try{
-        const {name, email, password, role} = req.body;
+    try {
+        const { name, email, password, role } = req.body;
+        if (!name || !email || !password) {
+            return res.status(400).json({
+                success: false,
+                message: "Name, email and password are required"
+            });
+        }
 
-        // VALIDATION
-        // if(!name || !email){
-        //     return res.status(400).json({
-        //         success: false,
-        //         message: "Name and email are required"
-        //     });
-        // }
+        /*
+        if(!name || !email){
+            return res.status(400).json({
+                success: false,
+                message: "Name and email are required"
+            });
+        }
 
-        // const newUser = {
-        //     id: Date.now().toString(),
-        //     ...req.body
-        //     // name,
-        //     // email
-        // };
+        const newUser = {
+            id: Date.now().toString(),
+            ...req.body
+            // name,
+            // email
+        };
 
-        // users.push(newUser);
+        users.push(newUser);
+        */
 
-        // const userBody = createUserService(name, email);
         const userBody = await createUserService(name, email, password, role);
 
         res.status(201).json({
@@ -91,7 +104,7 @@ export const createUser = async (req, res) => {
             data: userBody
         });
 
-    }catch(error){
+    } catch (error) {
         res.status(500).json({
             success: false,
             message: error.message
@@ -99,38 +112,37 @@ export const createUser = async (req, res) => {
     }
 };
 
-export const updateUser = (req, res) => {
-    try{
-        const {id} = req.params;
-        const {name, email} = req.body;
+export const updateUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name, email } = req.body;
 
-        // const user = users.find(u => u.id === id);
+        /*
+        const user = users.find(u => u.id === id);
 
-        // console.log("User name: ", name);
-        // console.log("User email: ", email);
-        
+        console.log("User name: ", name);
+        console.log("User email: ", email);
 
-        // const updatedUser = updateUserService(id, req.body);
-        const updatedUser = updateUserByEmailService(email, req.body);
+        // PARTIAL UPDATE
+        if(name) user.name = name;
+        if(email) user.email = email;
+        */
 
-        if(!updateUser){
+        const updatedUser = await updateUserByEmailService(email, req.body);
+
+        if (!updatedUser) {
             return res.status(404).json({
                 success: false,
                 message: "User not found"
             });
         }
 
-
-        // PARTIAL UPDATE
-        // if(name) user.name = name;
-        // if(email) user.email = email;
-        
         res.status(200).json({
             success: true,
             data: updatedUser
         });
-    }
-    catch(error){
+
+    } catch (error) {
         res.status(500).json({
             success: false,
             message: error.message
@@ -138,27 +150,73 @@ export const updateUser = (req, res) => {
     }
 };
 
-export const deleteUser = async(req, res) => {
+export const deleteUser = async (req, res) => {
     try {
         const { id } = req.params;
         const { email } = req.body;
 
-        // const index = users.findIndex(u => u.id === id);
+        /*
+        const index = users.findIndex(u => u.id === id);
 
-        // if (index === -1) {
-        //     return res.status(404).json({
-        //         success: false,
-        //         message: "User not found"
-        //     });
-        // }
+        if (index === -1) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
 
-        // const deletedUser = users.splice(index, 1);
+        const deletedUser = users.splice(index, 1);
+        */
+
         const deletedUser = await deleteServiceUser(email);
+
+        if (!deletedUser) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
 
         res.status(200).json({
             success: true,
             message: "User deleted successfully",
-            data: deletedUser[0]
+            data: deletedUser
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+export const createPost = async (req, res) => {
+    try {
+        const { title, content, user } = req.body;
+
+        const post = await createPostService(title, content, user);
+
+        res.status(201).json({
+            success: true,
+            data: post
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+export const getPost = async (req, res) => {
+    try {
+        const post = await getPostUsersService();
+
+        res.status(200).json({
+            success: true,
+            data: post
         });
 
     } catch (error) {
